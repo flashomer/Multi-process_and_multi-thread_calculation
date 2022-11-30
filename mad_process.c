@@ -62,11 +62,8 @@ void Child(float numbers[], int count, int n){
 	float cNumbers[50];
 
 	for(int j =0; j<n; j++){
-
 		cNumbers[c] = numbers[j];
-		
 		c++;
-
 	}
 	
 	childArray[SMALL] = RangeFunction(cNumbers,c)[SMALL];
@@ -80,11 +77,8 @@ void Parent(float numbers[], int count, int n)
 	float pNumbers[50];
 
 	for(int j =n; j<count; j++){
-
 		pNumbers[c] = numbers[j];
-		
 		c++;
-
 	}
 		
 	parentArray[SMALL] = RangeFunction(pNumbers,c)[SMALL];
