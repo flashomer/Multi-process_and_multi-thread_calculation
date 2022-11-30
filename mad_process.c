@@ -6,6 +6,7 @@
 #include <time.h>
 
 #define BUFFER_SIZE 	25
+#define NUMBER_SIZE 	100000
 #define READ_END	0
 #define WRITE_END	1
 
@@ -59,7 +60,7 @@ float* RangeFunction(float numbers[], int count)
 void Child(float numbers[], int count, int n){
 	
 	int c = 0;
-	float cNumbers[50];
+	float cNumbers[NUMBER_SIZE];
 
 	for(int j =0; j<n; j++){
 		cNumbers[c] = numbers[j];
@@ -74,7 +75,7 @@ void Child(float numbers[], int count, int n){
 void Parent(float numbers[], int count, int n)
 {	
 	int c = 0;
-	float pNumbers[50];
+	float pNumbers[NUMBER_SIZE];
 
 	for(int j =n; j<count; j++){
 		pNumbers[c] = numbers[j];
@@ -93,7 +94,7 @@ int main(void)
   start = clock();
   double pTime;
 	
-  float numbers[50];
+  float numbers[NUMBER_SIZE];
   int count=0;
   FILE *file;
   
@@ -102,7 +103,7 @@ int main(void)
   int fd2[2]; /* pipe 2 */ 
 
   
-  if (file = fopen("tiny.txt", "r"))
+  if (file = fopen("large.txt", "r"))
   {
     while (fscanf(file, " %f", &numbers[count]) != EOF)
     {
