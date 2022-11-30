@@ -2,22 +2,18 @@
 #include <stdlib.h> 
 #include <math.h> 
 #include <unistd.h>
-#include <sys/types.h>
-#include <string.h>
 #include <sys/wait.h>
 #include <time.h>
 
-
-#define BUFFER_SIZE 25
+#define BUFFER_SIZE 	25
 #define READ_END	0
 #define WRITE_END	1
 
 #define SMALL	0
 #define BIG	1
-#define MEAN		2
-#define MAD		3
+#define MEAN	2
+#define MAD	3
 
-float pMean,cMean;
 float write_global[BUFFER_SIZE];
 float read_global[BUFFER_SIZE]; 
 
@@ -60,7 +56,7 @@ float* RangeFunction(float numbers[], int count)
 }
 
 
-float Child(float numbers[], int count, int n){
+void Child(float numbers[], int count, int n){
 	
 	int c = 0;
 	float cNumbers[50];
@@ -72,20 +68,14 @@ float Child(float numbers[], int count, int n){
 		c++;
 
 	}
-
-		cMean = Mean(cNumbers,c);
-		
-		childArray[SMALL] = RangeFunction(cNumbers,c)[SMALL];
-		childArray[BIG]   = RangeFunction(cNumbers,c)[BIG];
-		
-		childArray[MEAN]   	 = Mean(cNumbers,c);
-
-	return cMean;
-
+	
+	childArray[SMALL] = RangeFunction(cNumbers,c)[SMALL];
+	childArray[BIG]   = RangeFunction(cNumbers,c)[BIG];
+	childArray[MEAN]  = Mean(cNumbers,c);
 }
 
-float Parent(float numbers[], int count, int n){
-	
+void Parent(float numbers[], int count, int n)
+{	
 	int c = 0;
 	float pNumbers[50];
 
@@ -96,15 +86,11 @@ float Parent(float numbers[], int count, int n){
 		c++;
 
 	}
-		pMean = Mean(pNumbers,c);
 		
-		parentArray[SMALL] = RangeFunction(pNumbers,c)[SMALL];
-		parentArray[BIG]   = RangeFunction(pNumbers,c)[BIG];
-		
-		parentArray[MEAN]   	 = Mean(pNumbers,c);
+	parentArray[SMALL] = RangeFunction(pNumbers,c)[SMALL];
+	parentArray[BIG]   = RangeFunction(pNumbers,c)[BIG];
+	parentArray[MEAN]  = Mean(pNumbers,c);
 
-
-	return pMean;
 }
 
 int main(void)
@@ -113,14 +99,15 @@ int main(void)
   start = clock();
   double pTime;
 	
-  float numbers[50],small,big,range;
+  float numbers[50];
   int count=0;
   FILE *file;
   
   int pid;
-  int fd1[2]; 
-  int fd2[2];  
+  int fd1[2]; /* pipe 1 */
+  int fd2[2]; /* pipe 2 */ 
 
+  
   if (file = fopen("tiny.txt", "r"))
   {
     while (fscanf(file, " %f", &numbers[count]) != EOF)
@@ -133,13 +120,14 @@ int main(void)
 
     
   if (pipe(fd1) == -1 || pipe(fd2) == -1) { fprintf(stderr,"Pipe failed"); return 1;}
+  
   pid = fork();
 
   if (pid < 0) { fprintf(stderr, "Fork failed"); return 1; }
 
   if (pid > 0) {  /*parent */
   
-	pMean = Parent(numbers,count,(int)(count/2));
+  	Parent(numbers,count,(count/2));
   
   	close(fd1[READ_END]); 
 	write(fd1[WRITE_END], parentArray, sizeof(parentArray)); 
@@ -156,27 +144,22 @@ int main(void)
 	
 	wait(NULL);
 	
-	
-	
 	end = clock();
      	pTime = ((double) fabsf(end - start) / CLOCKS_PER_SEC)*1000;
 	printf("Execution time for Range and MAD algorithm is  %.3f seconds.\n", pTime);
 
   } else {  /*child */
   
-	cMean = Child(numbers,count,(int)(count/2));
+  	Child(numbers,count,(count/2));
 
 	close(fd1[WRITE_END]); 
 	read(fd1[READ_END], read_global, sizeof(read_global));
-	
-	//pMean = read_global[0];
 	
 	float newRangeArray[4] = {read_global[SMALL],read_global[BIG],childArray[SMALL],childArray[BIG]};
 	float* comapreRange;
 	comapreRange = RangeFunction(newRangeArray, 4);
 
 	close(fd1[READ_END]);
-	
 	
 	printf("Range:  %.2f\n", (comapreRange[BIG]-comapreRange[SMALL]) );
 	printf("Mad:  %.2f\n", MADFunction(numbers, count, fabsf((read_global[MEAN]+childArray[MEAN])/2) ) );
@@ -195,7 +178,6 @@ int main(void)
 	
   }
   
-
   exit(0);
 
   return 0;
