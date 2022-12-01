@@ -1,5 +1,7 @@
 #include <stdio.h>
-#include<stdlib.h>  
+#include<stdlib.h>
+#include <math.h>  
+#include <time.h> 
 
 float Mean(float numbers[], int count)
 {
@@ -21,7 +23,7 @@ float MADFunction(float numbers[], int count)
 
 float RangeFunction(float numbers[], int count)
 {
-	float small,big;
+	float small=numbers[0],big=numbers[0];
     for (int i = 0; i<count; i++) {
     
 		if(numbers[i] > big) 	big = numbers[i];  
@@ -33,11 +35,16 @@ float RangeFunction(float numbers[], int count)
 
 int main(void)
 {
-  float numbers[50],small,big,range;
+  clock_t start, end;
+  start = clock();
+  double pTime;
+  
+  
+  float numbers[500000],small,big,range;
   int count=0;
   FILE *file;
 
-  if (file = fopen("tiny.txt", "r"))
+  if (file = fopen("large.txt", "r"))
   {
     while (fscanf(file, " %f", &numbers[count]) != EOF)
     {
@@ -54,6 +61,10 @@ int main(void)
 
 	printf("Range:  %.2f\n", RangeFunction(numbers, count) );
 	printf("Mad:  %.2f\n", MADFunction(numbers, count) );	
+
+	end = clock();
+     	pTime = ((double) fabsf(end - start) / CLOCKS_PER_SEC)*1000;
+	printf("Execution time for Range and MAD algorithm is  %.3f seconds.\n", pTime);
      
   }
 

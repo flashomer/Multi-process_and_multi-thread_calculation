@@ -6,7 +6,7 @@
 #include <time.h>
 
 #define BUFFER_SIZE 	25
-#define NUMBER_SIZE 	100000
+#define NUMBER_SIZE 	500000
 #define READ_END	0
 #define WRITE_END	1
 
@@ -21,6 +21,7 @@ float read_global[BUFFER_SIZE];
 float parentArray[4]; 
 float childArray[4]; 
 
+
 float Mean(float numbers[], int count)
 {
 	float sum = 0;
@@ -29,19 +30,20 @@ float Mean(float numbers[], int count)
 	return (sum / count);
 }
 
-float MADFunction(float numbers[], int count, float mean)
+float MADFunction(float numbers[], int count, float mean, int n, int c)
 {
 	float Sum = 0;
-	for (int i = 0; i < count; i++)
+	for (int i = n; i < count; i++) 
 		Sum = Sum + fabsf(numbers[i] - mean);
 
-	return (Sum / count);
+	return (Sum / c);
 }
 
 
 float* RangeFunction(float numbers[], int count)
 {
 	float small=numbers[0],big=numbers[0];
+	
 	static float Range[2];
 	
 	for (int i = 0; i<count; i++) {
@@ -50,8 +52,8 @@ float* RangeFunction(float numbers[], int count)
 	  	if(numbers[i] < small)  small = numbers[i];  		
 	}
 	
-	Range[0] = small;
-	Range[1] = big;
+	Range[SMALL] = small;
+	Range[BIG] = big;
 
 	return Range;
 }
@@ -123,7 +125,13 @@ int main(void)
   if (pid > 0) {  /*parent */
   
   	Parent(numbers,count,(count/2));
-  
+  	
+  	/*
+	  	parentArray[SMALL] = 1;
+	  	parentArray[BIG] = 6;
+	  	parentArray[MEAN] = 3.5;
+        */
+        
   	close(fd1[READ_END]); 
 	write(fd1[WRITE_END], parentArray, sizeof(parentArray)); 
 	close(fd1[WRITE_END]);
@@ -134,7 +142,11 @@ int main(void)
 	
 	close(fd2[WRITE_END]); 
 	read(fd2[READ_END], read_global2, sizeof(read_global2));
-	printf("New Parent:  %.2f - %.2f - %.2f\n", read_global2[0],read_global2[1],read_global2[2]);
+	
+	float parentMad = MADFunction(numbers, count, fabsf((parentArray[MEAN]+read_global2[MEAN])/2),(count/2),count );
+	
+	printf("Mad:  %.2f\n", (parentMad + read_global2[MAD]));
+
 	close(fd2[READ_END]);
 	
 	wait(NULL);
@@ -146,9 +158,21 @@ int main(void)
   } else {  /*child */
   
   	Child(numbers,count,(count/2));
+  	
+ 	/*
+	  	childArray[SMALL] = 7;
+	  	childArray[BIG] = 12;
+	  	childArray[MEAN] = 6;
+        */ 	
 
 	close(fd1[WRITE_END]); 
 	read(fd1[READ_END], read_global, sizeof(read_global));
+	
+	/*
+	  	read_global[SMALL] = 1;
+	  	read_global[BIG] = 6;
+	  	read_global[MEAN] = 3.5;
+        */
 	
 	float newRangeArray[4] = {read_global[SMALL],read_global[BIG],childArray[SMALL],childArray[BIG]};
 	float* comapreRange;
@@ -157,13 +181,10 @@ int main(void)
 	close(fd1[READ_END]);
 	
 	printf("Range:  %.2f\n", (comapreRange[BIG]-comapreRange[SMALL]) );
-	printf("Mad:  %.2f\n", MADFunction(numbers, count, fabsf((read_global[MEAN]+childArray[MEAN])/2) ) );
-	
+
 	wait(NULL);
 	
-	childArray[0] = 99999.0;
-	childArray[1] = 99999.1;
-	childArray[2] = 99999.2;
+	childArray[MAD]  = MADFunction(numbers, (count/2), fabsf((read_global[MEAN]+childArray[MEAN])/2),0,count);
 	
   	close(fd2[READ_END]); 
 	write(fd2[WRITE_END], childArray, sizeof(childArray)); 
