@@ -41,11 +41,6 @@ int part = 0;
 int flag = 0;
 
 
-void* sum_array(void* arg){
-	int thread_part = part++;
-	//MeanArray[thread_part] += arg;
-}
-
 void Mean(float numbers[], int count,int s, int n, int numPart, int thread_part)
 {
 
@@ -84,10 +79,6 @@ void RangeFunction(float numbers[], int count,int s, int n,int thread_part)
 	MeanArray[thread_part][SMALL] = small;
 	MeanArray[thread_part][BIG] = big;
 }
-
-
-
-
 
 void* threadMain(void *input)
 {
