@@ -11,11 +11,22 @@ float Mean(float numbers[], int count)
 	return (sum / count);
 }
 
-float MADFunction(float numbers[], int count)
+
+/*
+float Mean2(float numbers[], int count, float sum, int c)
+{
+	--c;
+	sum = sum + numbers[c];
+	
+	if(c == 0) return (sum / count);
+	else Mean2(numbers, count,sum, c);
+}*/
+
+float MADFunction(float numbers[], int count, float mean)
 {
 	float Sum = 0;
-	for (int i = 0; i < count; i++)
-		Sum = Sum + abs(numbers[i] - Mean(numbers, count));
+	for (int i = 0; i < count; i++) 
+		Sum = Sum + fabsf(numbers[i] - mean);
 
 	return (Sum / count);
 }
@@ -40,7 +51,7 @@ int main(void)
   double pTime;
   
   
-  float numbers[500000],small,big,range;
+  float numbers[500000],small,big,range,meanNum;
   int count=0;
   FILE *file;
 
@@ -58,9 +69,9 @@ int main(void)
     
     	printf(" %.2f\n",numbers[i]);
     }*/
-
+	meanNum = Mean(numbers, count);
 	printf("Range:  %.2f\n", RangeFunction(numbers, count) );
-	printf("Mad:  %.2f\n", MADFunction(numbers, count) );	
+	printf("Mad:  %.2f\n", MADFunction(numbers, count,meanNum) );	
 
 	end = clock();
      	pTime = ((double) fabsf(end - start) / CLOCKS_PER_SEC)*1000;
@@ -70,5 +81,4 @@ int main(void)
 
   return 0;
 }
-
 
