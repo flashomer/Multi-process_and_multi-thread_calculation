@@ -11,17 +11,6 @@ float Mean(float numbers[], int count)
 	return (sum / count);
 }
 
-
-/*
-float Mean2(float numbers[], int count, float sum, int c)
-{
-	--c;
-	sum = sum + numbers[c];
-	
-	if(c == 0) return (sum / count);
-	else Mean2(numbers, count,sum, c);
-}*/
-
 float MADFunction(float numbers[], int count, float mean)
 {
 	float Sum = 0;
@@ -44,7 +33,7 @@ float RangeFunction(float numbers[], int count)
 	return (big-small);
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
   clock_t start, end;
   start = clock();
@@ -55,7 +44,7 @@ int main(void)
   int count=0;
   FILE *file;
 
-  if (file = fopen("large.txt", "r"))
+  if (file = fopen(argv[1], "r"))
   {
     while (fscanf(file, " %f", &numbers[count]) != EOF)
     {
@@ -64,17 +53,12 @@ int main(void)
     
     fclose(file);
     
-    /*
-    for(int i=0; i<count; i++){
-    
-    	printf(" %.2f\n",numbers[i]);
-    }*/
 	meanNum = Mean(numbers, count);
 	printf("Range:  %.2f\n", RangeFunction(numbers, count) );
 	printf("Mad:  %.2f\n", MADFunction(numbers, count,meanNum) );	
 
 	end = clock();
-     	pTime = ((double) fabsf(end - start) / CLOCKS_PER_SEC)*1000;
+     	pTime = ((double) fabsf(end - start) / CLOCKS_PER_SEC)*100;
 	printf("Execution time for Range and MAD algorithm is  %.3f seconds.\n", pTime);
      
   }
