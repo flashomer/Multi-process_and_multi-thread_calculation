@@ -90,7 +90,7 @@ void Parent(float numbers[], int count, int n)
 
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
   clock_t start, end;
   start = clock();
@@ -105,8 +105,9 @@ int main(void)
   int fd2[2]; /* pipe 2 */ 
 
   
-  if (file = fopen("large.txt", "r"))
+  if (file = fopen(argv[1], "r"))
   {
+ 
     while (fscanf(file, " %f", &numbers[count]) != EOF)
     {
       count++;
@@ -126,12 +127,6 @@ int main(void)
   
   	Parent(numbers,count,(count/2));
   	
-  	/*
-	  	parentArray[SMALL] = 1;
-	  	parentArray[BIG] = 6;
-	  	parentArray[MEAN] = 3.5;
-        */
-        
   	close(fd1[READ_END]); 
 	write(fd1[WRITE_END], parentArray, sizeof(parentArray)); 
 	close(fd1[WRITE_END]);
@@ -152,27 +147,20 @@ int main(void)
 	wait(NULL);
 	
 	end = clock();
-     	pTime = ((double) fabsf(end - start) / CLOCKS_PER_SEC)*1000;
+     	pTime = ((double) fabsf(end - start) / CLOCKS_PER_SEC)*100;
 	printf("Execution time for Range and MAD algorithm is  %.3f seconds.\n", pTime);
 
   } else {  /*child */
   
-  	Child(numbers,count,(count/2));
-  	
- 	/*
-	  	childArray[SMALL] = 7;
-	  	childArray[BIG] = 12;
-	  	childArray[MEAN] = 6;
-        */ 	
+  	printf("Program is reading %s \n",argv[1]);
+	
+	printf("The child process is created \n");
+  
+  	Child(numbers,count,(count/2));	
 
 	close(fd1[WRITE_END]); 
 	read(fd1[READ_END], read_global, sizeof(read_global));
-	
-	/*
-	  	read_global[SMALL] = 1;
-	  	read_global[BIG] = 6;
-	  	read_global[MEAN] = 3.5;
-        */
+
 	
 	float newRangeArray[4] = {read_global[SMALL],read_global[BIG],childArray[SMALL],childArray[BIG]};
 	float* comapreRange;
